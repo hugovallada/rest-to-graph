@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"mime/multipart"
 	"net/http"
-	"os"
 )
 
 func main() {
@@ -14,7 +14,17 @@ func main() {
 }
 
 func CallGraphQL(w http.ResponseWriter, r *http.Request) {
-	queryData, err := ReadFile("develop/mock/query.graphql")
+	r.ParseMultipartForm(30 << 20)
+	url := r.Form.Get("url")
+	file, _, err := r.FormFile("file")
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		errorMessage := "Invalid file"
+		json.NewEncoder(w).Encode(errorMessage)
+	}
+
+	queryData, err := ReadFile(file)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -34,7 +44,7 @@ func CallGraphQL(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errorMessage)
 	}
 
-	req, err := http.Post("https://api.spacex.land/graphql/", "application/json", bytes.NewBuffer(jsonData))
+	req, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -57,13 +67,7 @@ func CallGraphQL(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func ReadFile(fileName string) (string, error) {
-	file, err := os.Open(fileName)
-
-	if err != nil {
-		return "", err
-	}
-
+func ReadFile(file multipart.File) (string, error) {
 	defer file.Close()
 
 	data, err := io.ReadAll(file)
