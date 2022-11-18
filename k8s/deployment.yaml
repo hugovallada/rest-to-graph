@@ -1,0 +1,38 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-to-graph
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rest-to-graph
+  template:
+    metadata:
+      labels:
+        app: rest-to-graph
+    spec:
+      containers:
+        - name: rest-to-graph
+          image: hugovallada/rest-to-graph:2.0
+          resources:
+            limits:
+              memory: "64Mi"
+              cpu: "126m"
+          ports:
+            - containerPort: 8080
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: rest-to-graph
+spec:
+  selector:
+    app: rest-to-graph
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30000
+  type: NodePort
