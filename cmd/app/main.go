@@ -6,65 +6,74 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"strings"
 )
 
 func main() {
 	http.HandleFunc("/", CallGraphQL)
-	http.ListenAndServe(":8081", nil)
+	http.ListenAndServe(":8080", nil)
+}
+
+func splitHeaders(headers string) map[string]string {
+	properties := make(map[string]string)
+
+	props := strings.Split(headers, ";")
+
+	for _, prop := range props {
+		keyValue := strings.Split(prop, "=")
+		properties[keyValue[0]] = keyValue[1]
+	}
+
+	return properties
+}
+
+func mountGraphQLQuery(queryBody string) map[string]string {
+	return map[string]string{"query": queryBody}
 }
 
 func CallGraphQL(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(30 << 20)
 	url := r.Form.Get("url")
+	headers := r.Form.Get("headers")
 	file, _, err := r.FormFile("file")
-
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		errorMessage := "Invalid file"
-		json.NewEncoder(w).Encode(errorMessage)
+		http.Error(w, "Invalid file", 400)
+		return
 	}
-
 	queryData, err := ReadFile(file)
-
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		errorMessage := "Invalid file"
-		json.NewEncoder(w).Encode(errorMessage)
+		http.Error(w, "Invalid file", 400)
+		return
 	}
-
-	jsonQuery := map[string]string{
-		"query": queryData,
-	}
-
-	jsonData, err := json.Marshal(jsonQuery)
-
+	jsonData, err := json.Marshal(mountGraphQLQuery(queryData))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		errorMessage := "Internal error while parsing the query"
-		json.NewEncoder(w).Encode(errorMessage)
+		http.Error(w, "Internal error while parsing the query", 500)
+		return
 	}
-
-	req, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
-
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		errorMessage := "Internal error while calling the graphql api"
-		json.NewEncoder(w).Encode(errorMessage)
+		http.Error(w, "Internal error while preparing the request", 500)
+		return
 	}
-
-	defer req.Body.Close()
-
-	data, err := io.ReadAll(req.Body)
-
+	if headers != "" {
+		properties := splitHeaders(headers)
+		for k, v := range properties {
+			req.Header.Set(k, v)
+		}
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		errorMessage := "Internal error while parsing the returned data"
-		json.NewEncoder(w).Encode(errorMessage)
+		http.Error(w, "Internal error while calling the api", 500)
+		return
 	}
-
+	defer resp.Body.Close()
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, "Internal error while parsing the returned data", 500)
+	}
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
-
 }
 
 func ReadFile(file multipart.File) (string, error) {
