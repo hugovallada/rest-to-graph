@@ -27,6 +27,7 @@ func GetDataFromGraphAPI(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal error while processing...", 500)
 		return
 	}
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
 }

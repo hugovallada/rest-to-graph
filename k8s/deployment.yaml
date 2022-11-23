@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: rest-to-graph
-          image: hugovallada/rest-to-graph:2.0
+          image: hugovallada/rest-to-graph:latest
           resources:
             limits:
               memory: "64Mi"
