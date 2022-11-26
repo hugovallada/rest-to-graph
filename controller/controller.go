@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -30,6 +31,18 @@ func GetDataFromGraphAPI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
+}
+
+func Health(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	status := "ok"
+	json.NewEncoder(w).Encode(status)
+}
+
+func Ready(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	status := "ok"
+	json.NewEncoder(w).Encode(status)
 }
 
 func parseMultiFormData(r *http.Request) (MultiPartFormData, error) {
