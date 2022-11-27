@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/hugovallada/rest-to-graph/client/graphql"
+	"github.com/hugovallada/rest-to-graph/controller/response"
 	"github.com/hugovallada/rest-to-graph/files"
 )
 
@@ -35,13 +36,13 @@ func GetDataFromGraphAPI(w http.ResponseWriter, r *http.Request) {
 
 func Health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	status := "ok"
+	status := response.New()
 	json.NewEncoder(w).Encode(status)
 }
 
 func Ready(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	status := "ok"
+	status := response.New()
 	json.NewEncoder(w).Encode(status)
 }
 
