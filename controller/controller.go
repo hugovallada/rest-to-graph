@@ -45,6 +45,12 @@ func Ready(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(status)
 }
 
+func Version(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	status := "1.0"
+	json.NewEncoder(w).Encode(status)
+}
+
 func parseMultiFormData(r *http.Request) (MultiPartFormData, error) {
 	r.ParseMultipartForm(30 << 20)
 	url := r.Form.Get("url")

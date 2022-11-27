@@ -15,13 +15,27 @@ spec:
     spec:
       containers:
         - name: rest-to-graph
-          image: hugovallada/rest-to-graph:latest
+          image: hugovallada/rest-to-graph:kubernetes-test
           resources:
             limits:
               memory: "64Mi"
               cpu: "126m"
           ports:
             - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 3
+            failureThreshold: 3
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            periodSeconds: 40
+            failureThreshold: 3
+            initialDelaySeconds: 30
 ---
 # Service
 apiVersion: v1
