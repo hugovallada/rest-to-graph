@@ -1,0 +1,84 @@
+basePath: /
+host: localhost:8081
+info:
+  contact:
+    email: valladahugo@gmail.com
+    name: Hugo Lopes
+    url: https://github.com/hugovallada
+  description: Application that allows other apps to call a graphql via a rest endpoint
+  license:
+    name: Apache 2.0
+  termsOfService: http://swagger.io/terms
+  title: Rest To Graph
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Health Endpoint for livenessProbe
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - health
+  /query:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Receives a graphql file and calls a graphql endpoint
+      parameters:
+      - description: Url do endpoint graph
+        in: formData
+        name: url
+        required: true
+        type: string
+      - description: Arquivo .graphql
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Headers a serem enviados para o endpoint
+        in: formData
+        name: headers
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - query
+  /ready:
+    get:
+      description: Ready Endpoint for livenessProbe
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - health
+swagger: "2.0"
