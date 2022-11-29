@@ -10,6 +10,19 @@ import (
 	"github.com/hugovallada/rest-to-graph/files"
 )
 
+// Make a GraphQL call godoc
+// @Sumary 			Calls a GraphQL endpoint
+// @Description 	Receives a graphql file and calls a graphql endpoint
+// @Tags 			query
+// @Accept			multipart/form-data
+// @Produce 		json
+// @Param			url	    formData string true  "Url do endpoint graph"
+// @Param 			file    formData file   true  "Arquivo .graphql"
+// @Param           headers formData string false "Headers a serem enviados para o endpoint"
+// @Success 200 {object} string
+// @Failure 400 {object} string
+// @Failure 500 {object} string
+// @Router /query [post]
 func GetDataFromGraphAPI(w http.ResponseWriter, r *http.Request) {
 	multiPartData, err := parseMultiFormData(r)
 	if err != nil {
@@ -34,12 +47,28 @@ func GetDataFromGraphAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// Health Endpoint godoc
+// @Sumary 			Health Endpoint
+// @Description 	Health Endpoint for livenessProbe
+// @Tags 			health
+// @Produce 		json
+// @Success 200 {object} string
+// @Failure 500 {object} string
+// @Router /health [get]
 func Health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	status := response.New()
 	json.NewEncoder(w).Encode(status)
 }
 
+// Ready Endpoint godoc
+// @Sumary 			Ready Endpoint
+// @Description 	Ready Endpoint for livenessProbe
+// @Tags 			health
+// @Produce 		json
+// @Success 200 {object} string
+// @Failure 500 {object} string
+// @Router /ready [get]
 func Ready(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	status := response.New()
